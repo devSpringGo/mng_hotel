@@ -1,6 +1,7 @@
 ﻿using ManageHotel.Models;
 using ManageHotel.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ManageHotel.Controllers
 {
@@ -14,7 +15,13 @@ namespace ManageHotel.Controllers
         }
 
         public IActionResult Login() => View();
-        public IActionResult Register() => View();
+        public IActionResult Register()
+        {
+            var hotels = _authService.GetHotelsAsync().Result; // hoặc await nếu action là async
+
+            ViewBag.Hotels = new SelectList(hotels, "HotelId", "HotelName");
+            return View();
+        }
 
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
@@ -31,17 +38,33 @@ namespace ManageHotel.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(HotelUser model, string password)
+        public async Task<IActionResult> Register(HotelUser model, string password, int HotelId)
         {
-            if (!ModelState.IsValid) return View(model);
+            var hotels = await _authService.GetHotelsAsync();
 
-            if (!await _authService.RegisterAsync(model, password))
+            ModelState.Remove("Hotel");
+            ModelState.Remove("PasswordHash");
+            
+            if (!ModelState.IsValid)
+            {
+                // 🔹 Load lại danh sách hotel
+                ViewBag.Hotels = new SelectList(hotels, "HotelId", "HotelName");
+
+                foreach (var error in ModelState)
+                {
+                    Console.WriteLine($"{error.Key}: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
+                }
+                return View(model);
+            }
+
+            if (!await _authService.RegisterAsync(model, password,HotelId))
             {
                 ViewBag.Error = "Username already taken!";
+                ViewBag.Hotels = new SelectList(hotels, "HotelId", "HotelName");
                 return View(model);
             }
 
             return RedirectToAction("Login");
-        }
+        }   
     }
 }
