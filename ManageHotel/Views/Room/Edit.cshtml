@@ -1,0 +1,96 @@
+﻿@model ManageHotel.Models.Room
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using ManageHotel.Models
+
+@{
+    ViewData["Title"] = "Edit Room";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-3">Edit Room</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="RoomId" />
+
+                @* Validation Summary *@
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                <!-- Hotel -->
+                <div class="mb-3">
+                    <label class="form-label">Hotel</label>
+                    <input type="hidden" id="hotelIdHidden" name="HotelId" value="@Model.HotelId" />
+                    <select id="hotelSelect" class="form-select" required>
+                        <option value="">-- Chọn Hotel --</option>
+                        @foreach (var h in ViewBag.HotelsList)
+                        {
+                            <option value="@h.HotelId" selected="@(h.HotelId == Model.HotelId ? "selected" : "")">@h.HotelName</option>
+                        }
+                    </select>
+
+                </div>
+               
+                <!-- RoomType -->
+                <div class="mb-3">
+                    <label class="form-label">Room Type</label>
+                    <input type="hidden" id="roomTypeHidden" asp-for="RoomTypeId" value="@Model.RoomTypeId" />
+                    <select asp-for="RoomTypeId" id="roomTypeSelect" class="form-select" required>
+                        <option value="">-- Chọn Hotel --</option>
+                        @foreach (var t in ViewBag.RoomTypeList)
+                        {
+                            <option value="@t.RoomTypeId" selected="@(t.RoomTypeId == Model.RoomTypeId ? "selected" : "")">@t.TypeName</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Room Name -->
+                <div class="mb-3">
+                    <label class="form-label">Room Name</label>
+                    <input asp-for="RoomName" class="form-control" required />
+                </div>
+
+                <!-- Ical Link -->
+                <div class="mb-3">
+                    <label class="form-label">Link Ical</label>
+                    <input type="text" asp-for="LinkIcal" class="form-control" required />
+                </div>
+
+                <!-- Status -->
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select asp-for="Status" asp-items="ViewBag.StatusList" class="form-select">
+                        <option value="">-- Chọn Status --</option>
+                    </select>
+                </div>
+
+                <!-- Notes -->
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea asp-for="Notes" class="form-control"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">Save Changes</button>
+                <a class="btn btn-secondary" href="@Url.Action("Index")">Back</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Hotel dropdown -> hidden input
+        const hotelSelect = document.getElementById('hotelSelect');
+        const hotelHidden = document.getElementById('hotelIdHidden');
+        hotelSelect.addEventListener('change', function () {
+            hotelHidden.value = this.value;
+        });
+
+        // RoomType dropdown -> hidden input
+        const roomTypeSelect = document.getElementById('roomTypeSelect');
+        const roomTypeHidden = document.getElementById('roomTypeHidden');
+        roomTypeSelect.addEventListener('change', function () {
+            roomTypeHidden.value = this.value;
+        });
+    </script>
+}

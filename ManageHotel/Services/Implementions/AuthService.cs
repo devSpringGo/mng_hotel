@@ -1,0 +1,47 @@
+﻿using ManageHotel.Data;
+using ManageHotel.Models;
+using ManageHotel.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+namespace ManageHotel.Models
+{
+    public class AuthService : IAuthService
+    {
+        private readonly AppDbContext _context;
+
+        public AuthService(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<HotelUser?> LoginAsync(string username, string password)
+        {
+            string hashed = HashPassword(password);
+            return await _context.HotelUsers.FirstOrDefaultAsync(u => u.Username == username && u.PasswordHash == hashed);
+        }
+
+        public async Task<bool> RegisterAsync(HotelUser user, string password)
+        {
+            if (await IsUsernameTakenAsync(user.Username)) return false;
+
+            user.PasswordHash = HashPassword(password);
+            user.CreatedAt = DateTime.Now;
+            user.IsActive = true;
+
+            _context.HotelUsers.Add(user);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> IsUsernameTakenAsync(string username)
+            => await _context.HotelUsers.AnyAsync(u => u.Username == username);
+
+        private string HashPassword(string password)
+        {
+            using var sha = SHA256.Create();
+            return Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(password)));
+        }
+    }
+}

@@ -1,0 +1,66 @@
+﻿@model ManageHotel.Models.Room
+@{
+    ViewData["Title"] = "Create Room";
+    Layout = "_Layout";
+}
+<div class="container-fluid">
+    <h1 class="h3 mb-3">Create Room</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Hotel</label>
+                    <select asp-for="HotelId" asp-items="ViewBag.Hotels" class="form-select" id="hotelSelect" required></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Room Type</label>
+                    <select asp-for="RoomTypeId" asp-items="ViewBag.RoomTypes" class="form-select" id="roomTypeSelect" required></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Room Name</label>
+                    <input asp-for="RoomName" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        @foreach (var s in (IEnumerable<SelectListItem>)ViewBag.StatusList)
+                        {
+                            <option value="@s.Value">@s.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Link Ical</label>
+                    <input asp-for="LinkIcal" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea asp-for="Notes" class="form-control"></textarea>
+                </div>
+
+                <button class="btn btn-success">Save</button>
+                <a class="btn btn-secondary" href="@Url.Action("Index")">Back</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // load room types when hotel changes (AJAX)
+        document.getElementById('hotelSelect').addEventListener('change', async function () {
+            var hotelId = this.value;
+            var select = document.getElementById('roomTypeSelect');
+            select.innerHTML = '<option>Loading...</option>';
+            if (!hotelId) { select.innerHTML = ''; return; }
+            const res = await fetch(`/api/roomtypes/byhotel/${hotelId}`);
+            if (!res.ok) { select.innerHTML = ''; return; }
+            const data = await res.json();
+            select.innerHTML = data.map(x => `<option value="${x.roomTypeId}">${x.typeName}</option>`).join('');
+        });
+    </script>
+}

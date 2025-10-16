@@ -1,0 +1,40 @@
+﻿@model ManageHotel.Models.RoomType
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Create Room Type";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-3">Create Room Type</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Hotel</label>
+                    <select asp-for="HotelId" asp-items="ViewBag.Hotels" class="form-select" required></select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Type Name</label>
+                    <input asp-for="TypeName" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Room Count</label>
+                    <input asp-for="RoomCount" type="number" min="0" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">iCal Link</label>
+                    <input asp-for="IcalLink" class="form-control" />
+                </div>
+
+                <button class="btn btn-success">Create</button>
+                <a class="btn btn-secondary" href="@Url.Action("Index")">Back</a>
+            </form>
+        </div>
+    </div>
+</div>

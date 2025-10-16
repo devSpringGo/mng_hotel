@@ -1,0 +1,15 @@
+﻿@model int
+
+@{
+    var status = (ManageHotel.Models.RoomStatus)Model;
+    string css = status switch
+    {
+        ManageHotel.Models.RoomStatus.Available => "badge bg-success",
+        ManageHotel.Models.RoomStatus.Booked => "badge bg-danger",
+        ManageHotel.Models.RoomStatus.Cleaning => "badge bg-warning text-dark",
+        ManageHotel.Models.RoomStatus.Maintenance => "badge bg-secondary",
+        _ => "badge bg-light text-dark"
+    };
+}
+
+<span class="@css">@status.ToString()</span>

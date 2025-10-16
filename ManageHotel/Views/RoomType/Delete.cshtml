@@ -1,0 +1,21 @@
+﻿@model ManageHotel.Models.RoomType
+
+@{
+    ViewData["Title"] = "Delete Room Type";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-3">Delete Room Type</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <p>Are you sure you want to delete <strong>@Model.TypeName</strong>?</p>
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="RoomTypeId" />
+                <button class="btn btn-danger">Delete</button>
+                <a class="btn btn-secondary" href="@Url.Action("Index")">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

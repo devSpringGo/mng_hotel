@@ -1,0 +1,97 @@
+﻿@model IEnumerable<ManageHotel.Models.Hotel>
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Hotels";
+    Layout = "_Layout";
+
+    var currentKeyword = ViewContext.HttpContext.Request.Query["keyword"].ToString();
+    var currentIsActive = ViewContext.HttpContext.Request.Query["isActive"].ToString();
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-3 text-gray-800">Hotels</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <form method="get" class="d-flex gap-2 align-items-center">
+
+                <input type="text" name="keyword" class="form-control" placeholder="Search Hotel Name..."
+                       value="@currentKeyword" style="width:280px;" />
+
+                <select name="isActive" class="form-select" style="width:160px;" onchange="this.form.submit()">
+                    @foreach (var s in (IEnumerable<SelectListItem>)ViewBag.StatusList)
+                    {
+                        var sel = (currentIsActive == s.Value) ? "selected=\"selected\"" : "";
+                        @Html.Raw($"<option value=\"{s.Value}\" {sel}>{s.Text}</option>")
+                    }
+                </select>
+
+                <button class="btn btn-primary"><i class="fa fa-search"></i></button>
+            </form>
+
+            <a class="btn btn-success" href="@Url.Action("Create")"><i class="fa fa-plus"></i> Add Hotel</a>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Hotel Name</th>
+                            <th>Email</th>
+                            <th>Address</th>
+                            <th>Status</th>
+                            <th>Created At</th>
+                            <th style="width:140px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr><td colspan="7" class="text-center text-muted">No hotels found</td></tr>
+                        }
+                        else
+                        {
+                            var i = 1;
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@i++</td>
+                                    <td>@item.HotelName</td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(item.Email))
+                                        {
+                                            <a href="mailto:@item.Email" class="badge bg-primary text-decoration-none">@item.Email</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Missing</span>
+                                        }
+                                    </td>
+                                    <td>@item.Address</td>
+                                    <td>
+                                        @if (item.IsActive == true)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>@(item.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                    <td>
+                                        <a class="btn btn-sm btn-info" href="@Url.Action("Edit", new { id = item.HotelId })"><i class="fa fa-edit"></i></a>
+                                        <a class="btn btn-sm btn-danger" href="@Url.Action("Delete", new { id = item.HotelId })"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
