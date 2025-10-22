@@ -14,6 +14,7 @@ namespace ManageHotel.Services.Implementions
         }
 
         public async Task<IEnumerable<Room>> GetAllAsync(int? hotelId = null)
+        
         {
             var q = _context.Rooms
                 .Include(r => r.Hotel)

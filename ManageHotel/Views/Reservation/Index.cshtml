@@ -1,0 +1,98 @@
+﻿@model IEnumerable<ManageHotel.ViewModels.BookingEvent>
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Lịch đặt phòng";
+    Layout = "_Layout";
+
+    var currentRoom = ViewContext.HttpContext.Request.Query["roomId"].ToString();
+    var currentKeyword = ViewContext.HttpContext.Request.Query["keyword"].ToString();
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-3 text-gray-800">
+        <i class="fa fa-calendar-check text-primary me-1"></i> Lịch đặt phòng
+    </h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <form method="get" class="d-flex gap-2 align-items-center">
+                <!-- Lọc theo phòng -->
+                <select name="roomId" class="form-select" style="width:220px;" onchange="this.form.submit()">
+                    <option value="">-- Tất cả phòng --</option>
+                    @foreach (var r in (SelectList)ViewBag.Rooms)
+                    {
+                        var sel = (currentRoom == r.Value) ? "selected=\"selected\"" : "";
+                        @Html.Raw($"<option value=\"{r.Value}\" {sel}>{r.Text}</option>")
+                    }
+                </select>
+
+                <!-- Từ khóa -->
+                <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên hoặc mô tả..." style="width:300px;"
+                       value="@currentKeyword" />
+
+                <button class="btn btn-primary"><i class="fa fa-search"></i></button>
+            </form>
+
+            <a class="btn btn-success" href="@Url.Action("SyncIcal")">
+                <i class="fa fa-sync-alt"></i> Đồng bộ iCal
+            </a>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Phòng</th>
+                            <th>Khách đặt</th>
+                            <th>Chi tiết</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Ngày tạo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr><td colspan="7" class="text-center text-muted">Không có đặt phòng nào</td></tr>
+                        }
+                        else
+                        {
+                            var i = 1;
+                            foreach (var item in Model.OrderBy(x => x.Start))
+                            {
+                                <tr>
+                                    <td>@(i++)</td>
+                                    <td>
+                                        <span class="fw-semibold text-dark">@item.RoomName</span>
+                                    </td>
+                                    <td>@item.Summary</td>
+                                    <td style="white-space: pre-line;">@item.Description</td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fa fa-arrow-down me-1"></i>
+                                            @item.Start.ToString("dd/MM/yyyy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger">
+                                            <i class="fa fa-arrow-up me-1"></i>
+                                            @item.End.ToString("dd/MM/yyyy")
+                                        </span>
+                                    </td>
+                                    <td class="text-muted small">@item.Created?.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://kit.fontawesome.com/a2e0e9f65c.js" crossorigin="anonymous"></script>
+}
