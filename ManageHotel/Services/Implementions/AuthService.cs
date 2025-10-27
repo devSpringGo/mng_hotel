@@ -5,15 +5,21 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+
 namespace ManageHotel.Models
 {
     public class AuthService : IAuthService
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AppDbContext _context;
 
-        public AuthService(AppDbContext context)
+        public AuthService(AppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<HotelUser?> LoginAsync(string username, string password)
@@ -48,6 +54,11 @@ namespace ManageHotel.Models
         public async Task<IEnumerable<Hotel>> GetHotelsAsync()
         {
             return await _context.Hotels.OrderBy(h => h.HotelName).ToListAsync();
+        }
+
+        public async Task LogoutAsync()
+        {
+            await _httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
     }

@@ -1,9 +1,11 @@
 using ManageHotel.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ManageHotel.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -15,6 +17,8 @@ namespace ManageHotel.Controllers
 
         public IActionResult Index()
         {
+            var username = User.Identity?.Name;
+            ViewBag.Username = username;
             return View();
         }
 

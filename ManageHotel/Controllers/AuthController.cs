@@ -2,9 +2,14 @@
 using ManageHotel.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ManageHotel.Controllers
 {
+
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
@@ -14,15 +19,25 @@ namespace ManageHotel.Controllers
             _authService = authService;
         }
 
-        public IActionResult Login() => View();
+
+        public IActionResult Login()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                // Nếu đã login rồi thì chuyển thẳng về dashboard
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View();
+        }
+
         public IActionResult Register()
         {
-            var hotels = _authService.GetHotelsAsync().Result; // hoặc await nếu action là async
+            var hotels = _authService.GetHotelsAsync().Result;
 
             ViewBag.Hotels = new SelectList(hotels, "HotelId", "HotelName");
             return View();
         }
-
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
@@ -33,10 +48,21 @@ namespace ManageHotel.Controllers
                 return View();
             }
 
-            // TODO: Set session / cookie
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role ?? "Receptionist")
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            // ✅ Đăng nhập (ghi cookie)
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            // TODO: Set session / cookie   
             return RedirectToAction("Index", "Home");
         }
-
         [HttpPost]
         public async Task<IActionResult> Register(HotelUser model, string password, int HotelId)
         {
@@ -44,7 +70,7 @@ namespace ManageHotel.Controllers
 
             ModelState.Remove("Hotel");
             ModelState.Remove("PasswordHash");
-            
+
             if (!ModelState.IsValid)
             {
                 // 🔹 Load lại danh sách hotel
@@ -57,14 +83,22 @@ namespace ManageHotel.Controllers
                 return View(model);
             }
 
-            if (!await _authService.RegisterAsync(model, password,HotelId))
+            if (!await _authService.RegisterAsync(model, password, HotelId))
             {
                 ViewBag.Error = "Username already taken!";
                 ViewBag.Hotels = new SelectList(hotels, "HotelId", "HotelName");
                 return View(model);
             }
-
+            TempData["SuccessMessage"] = "Register success!";
             return RedirectToAction("Login");
-        }   
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            await _authService.LogoutAsync();
+            return RedirectToAction("Login", "Auth");
+        }
     }
 }
