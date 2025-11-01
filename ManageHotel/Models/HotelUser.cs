@@ -20,7 +20,7 @@ public partial class HotelUser
     public string Username { get; set; } = null!;
 
     [StringLength(255)]
-    public string PasswordHash { get; set; } = null!;
+    public string? PasswordHash { get; set; }
 
     [StringLength(100)]
     public string? FullName { get; set; }
@@ -38,7 +38,7 @@ public partial class HotelUser
 
     [ForeignKey("HotelId")]
     [InverseProperty("HotelUsers")]
-    public virtual Hotel Hotel { get; set; } = null!;
+    public virtual Hotel? Hotel { get; set; }
 
     [InverseProperty("CreatedByNavigation")]
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();

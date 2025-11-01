@@ -22,13 +22,14 @@ namespace ManageHotel.Models
             return await _context.HotelUsers.FirstOrDefaultAsync(u => u.Username == username && u.PasswordHash == hashed);
         }
 
-        public async Task<bool> RegisterAsync(HotelUser user, string password)
+        public async Task<bool> RegisterAsync(HotelUser user, string password, int hotelId)
         {
             if (await IsUsernameTakenAsync(user.Username)) return false;
 
             user.PasswordHash = HashPassword(password);
             user.CreatedAt = DateTime.Now;
             user.IsActive = true;
+            user.HotelId = hotelId;
 
             _context.HotelUsers.Add(user);
             await _context.SaveChangesAsync();
@@ -43,5 +44,11 @@ namespace ManageHotel.Models
             using var sha = SHA256.Create();
             return Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(password)));
         }
+
+        public async Task<IEnumerable<Hotel>> GetHotelsAsync()
+        {
+            return await _context.Hotels.OrderBy(h => h.HotelName).ToListAsync();
+        }
+
     }
 }
