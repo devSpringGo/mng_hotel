@@ -26,7 +26,7 @@ public partial class HotelUser
     public string? FullName { get; set; }
 
     [StringLength(50)]
-    public string? Role { get; set; }
+    public string? Role { get; set; } = "Receptionist";
 
     [StringLength(100)]
     public string? Email { get; set; }

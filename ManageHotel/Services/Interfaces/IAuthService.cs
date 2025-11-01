@@ -9,6 +9,7 @@ namespace ManageHotel.Services.Interfaces
         Task<bool> RegisterAsync(HotelUser user, string password, int hotelId);
         Task<bool> IsUsernameTakenAsync(string username);
         Task<IEnumerable<Hotel>> GetHotelsAsync();
+        Task LogoutAsync(); 
 
     }
 }
